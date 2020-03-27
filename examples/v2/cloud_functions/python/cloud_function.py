@@ -15,13 +15,13 @@
 
 import base64
 import hashlib
-from StringIO import StringIO
+from io import BytesIO
 import zipfile
 
 
 def GenerateConfig(ctx):
   """Generate YAML resource configuration."""
-  in_memory_output_file = StringIO()
+  in_memory_output_file = BytesIO()
   function_name = ctx.env['deployment'] + 'cf'
   zip_file = zipfile.ZipFile(
       in_memory_output_file, mode='w', compression=zipfile.ZIP_DEFLATED)
@@ -35,7 +35,7 @@ def GenerateConfig(ctx):
   m.update(content)
   source_archive_url = 'gs://%s/%s' % (ctx.properties['codeBucket'],
                                        m.hexdigest() + '.zip')
-  cmd = "echo '%s' | base64 -d > /function/function.zip;" % (content)
+  cmd = "echo '%s' | base64 -d > /function/function.zip;" % (content.decode('ascii'))
   volumes = [{'name': 'function-code', 'path': '/function'}]
   build_step = {
       'name': 'upload-function-code',
